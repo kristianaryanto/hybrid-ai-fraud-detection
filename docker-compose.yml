@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Layanan Backend FastAPI
+  backend:
+    build: ./backend
+    container_name: jaga-dana-backend
+    ports:
+      - "8088:8088"
+    volumes:
+      # Mount kode untuk development, bisa dihapus di production
+      - ./backend:/app
+    env_file:
+      - .env # Mengambil environment variable dari file .env
+    depends_on:
+      - redis
+    networks:
+      - jaga-dana-net
+
+  # Layanan Frontend React
+  frontend:
+    build: ./frontend
+    container_name: jaga-dana-frontend
+    ports:
+      - "3000:80" # Map port 3000 di host ke port 80 Nginx di container
+    depends_on:
+      - backend
+    networks:
+      - jaga-dana-net
+
+  # Layanan Database Redis
+  redis:
+    image: "redis:alpine"
+    container_name: jaga-dana-redis
+    networks:
+      - jaga-dana-net
+
+networks:
+  jaga-dana-net:
+    driver: bridge
